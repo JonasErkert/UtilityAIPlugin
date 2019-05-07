@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "UtilityAIPlugin",
+	"Description": "Enables the creation of Utility AI.",
+	"Category": "Other",
+	"CreatedBy": "Jonas Erkert",
+	"CreatedByURL": "https://github.com/JonasErkert/UtilityAIPlugin",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "UtilityAIPlugin",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
