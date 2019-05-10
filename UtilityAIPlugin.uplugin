@@ -2,9 +2,9 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "UtilityAIPlugin",
+	"FriendlyName": "Utility AI Plugin",
 	"Description": "Enables the creation of Utility AI.",
-	"Category": "Other",
+	"Category": "Utility AI",
 	"CreatedBy": "Jonas Erkert",
 	"CreatedByURL": "https://github.com/JonasErkert/UtilityAIPlugin",
 	"DocsURL": "",
@@ -15,8 +15,13 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "UtilityAIPlugin",
+			"Name": "UtilityAIRuntime",
 			"Type": "Runtime",
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "UtilityAIEditor",
+			"Type": "Editor",
 			"LoadingPhase": "Default"
 		}
 	]
