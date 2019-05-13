@@ -12,6 +12,16 @@ public class UtilityAIRuntime : ModuleRules
 		PublicDependencyModuleNames.AddRange( new string[] { "Core", "CoreUObject", "Engine" } );
 		PrivateDependencyModuleNames.AddRange( new string[] { "Slate", "SlateCore", "GameplayTags" } );
 
+		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
+		{
+			PrivateDependencyModuleNames.Add("GameplayDebugger");
+			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
+		}
+		else
+		{
+			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=0");
+		}
+
 		DynamicallyLoadedModuleNames.AddRange( new string[] { } );
 	}
 }
