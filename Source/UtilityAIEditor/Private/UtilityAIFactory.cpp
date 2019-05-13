@@ -20,4 +20,14 @@ UObject* UUtilityAIFactory::FactoryCreateNew(UClass* Class, UObject* InParent, F
 	return NewObject<UObject>(InParent, Class, Name, Flags | RF_Transactional);
 }
 
+FText UUtilityAIFactory::GetDisplayName() const
+{
+	return LOCTEXT("UtilityAIText", "UtilityAI");
+}
+
+FString UUtilityAIFactory::GetDefaultNewAssetName() const
+{
+	return FString(TEXT("NewUtilityAI"));
+}
+
 #undef LOCTEXT_NAMESPACE

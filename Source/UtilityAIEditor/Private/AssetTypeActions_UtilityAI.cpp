@@ -11,12 +11,12 @@ FAssetTypeActions_UtilityAI::FAssetTypeActions_UtilityAI(EAssetTypeCategories::T
 
 FText FAssetTypeActions_UtilityAI::GetName() const
 {
-	return LOCTEXT("FUtilityAIAssetTypeActionsName", "Utility AI");
+	return LOCTEXT("FUtilityAIAssetTypeActionsName", "UtilityAI");
 }
 
 FColor FAssetTypeActions_UtilityAI::GetTypeColor() const
 {
-	return FColor(129, 196, 115);
+	return FColor(224, 34, 70);
 }
 
 UClass* FAssetTypeActions_UtilityAI::GetSupportedClass() const
