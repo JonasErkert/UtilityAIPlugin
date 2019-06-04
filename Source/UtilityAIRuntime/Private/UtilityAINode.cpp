@@ -5,6 +5,15 @@
 
 UUtilityAINode::UUtilityAINode()
 {
+	bUsingCustomResponseCurve = true;
+	ActionScore			= 0.f;
+	ConsiderationScore	= 0.f;
+	BookendMin			= 0.f;
+	BookendMax			= 1.f;
+	bUseWeight			= false;
+	Weight				= 1.f;
+	bInvertScore		= false;
+
 #if WITH_EDITORONLY_DATA
 	CompatibleGraphType = UUtilityAIGraph::StaticClass();
 
