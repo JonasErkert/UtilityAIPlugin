@@ -9,7 +9,7 @@ public class UtilityAIRuntime : ModuleRules
 		PublicIncludePaths.AddRange( new string[] { } );
 		PrivateIncludePaths.AddRange( new string[] { "UtilityAIRuntime/Private" } );
 
-		PublicDependencyModuleNames.AddRange( new string[] { "Core", "CoreUObject", "Engine" } );
+		PublicDependencyModuleNames.AddRange( new string[] { "Core", "CoreUObject", "Engine", "AIModule" } );
 		PrivateDependencyModuleNames.AddRange( new string[] { "Slate", "SlateCore", "GameplayTags" } );
 
 		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
