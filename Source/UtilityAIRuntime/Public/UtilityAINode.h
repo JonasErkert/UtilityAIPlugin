@@ -32,16 +32,6 @@ enum class ENodeType : uint8
 	NodeType_Decision			UMETA(DisplayName = "Decision Node")
 };
 
-/**
- * Defines the action score evaluation methods.
- */
-UENUM(BlueprintType)
-enum class EEvaluationMethod : uint8
-{
-	EvaluationMethod_Highest			UMETA(DisplayName = "Highest"),
-	EvaluationMethod_WeightedRandom		UMETA(DisplayName = "Weighted Random")
-};
-
 UCLASS(Blueprintable)
 class UTILITYAIRUNTIME_API UUtilityAINode : public UObject
 {
@@ -62,6 +52,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "UtilityAINode")
 	TMap<UUtilityAINode*, UUtilityAIEdge*> Edges;
+
+	/** The name of the node. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	FName NodeName;
 
 	/** The node this this node represents. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
@@ -147,7 +141,7 @@ public:
 	virtual FText GetDescription_Implementation() const;
 
 	UFUNCTION(BlueprintCallable, Category = "UtilityAINode")
-	FText GetNodeDescription() const { return NodeTitle; }
+	FName GetNodeName() const;
 
 	//////////////////////////////////////////////////////////////////////////
 #if WITH_EDITORONLY_DATA

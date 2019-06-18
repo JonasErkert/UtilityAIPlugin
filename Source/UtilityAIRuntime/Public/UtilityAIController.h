@@ -9,6 +9,16 @@
 class UUtilityAINode;
 
 /**
+ * Defines the action score evaluation methods.
+ */
+UENUM(BlueprintType)
+enum class EScoreSelectionMethod : uint8
+{
+	ScoreSelectionMethod_Highest			UMETA(DisplayName = "Highest"),
+	ScoreSelectionMethod_WeightedRandom		UMETA(DisplayName = "Weighted Random")
+};
+
+/**
  * This AIController derived class provides functions to evaluate an Utility AI Graph.
  */
 UCLASS()

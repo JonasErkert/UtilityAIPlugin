@@ -37,6 +37,11 @@ FText UUtilityAINode::GetDescription_Implementation() const
 	return LOCTEXT("NodeDesc", "Utility AI Node");
 }
 
+FName UUtilityAINode::GetNodeName() const
+{
+	return NodeName;
+}
+
 #if WITH_EDITOR
 
 FLinearColor UUtilityAINode::GetBackgroundColor() const
