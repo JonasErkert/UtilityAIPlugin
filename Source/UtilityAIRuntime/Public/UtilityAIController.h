@@ -35,7 +35,7 @@ class UTILITYAIRUNTIME_API AUtilityAIController : public AAIController
 	 * @see SetActionScore()
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
-	float SetConsiderationScore(UUtilityAINode* CurrentConsiderationNode, float ValueToNormalize);
+	float SetConsiderationScore(UUtilityAINode* CurrentConsiderationNode, float ValueToEvaluate);
 
 	/**
 	 * Iterates over the ConsiderationScores, multiplies each score and saves the calculated action score into the current action node.

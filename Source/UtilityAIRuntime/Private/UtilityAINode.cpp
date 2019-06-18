@@ -5,7 +5,8 @@
 
 UUtilityAINode::UUtilityAINode()
 {
-	bUsingCustomResponseCurve = true;
+	bUsingCustomResponseCurve	= true;
+	bIsNormalizedCustomCurve	= true;
 	ActionScore			= 0.f;
 	ConsiderationScore	= 0.f;
 	BookendMin			= 0.f;

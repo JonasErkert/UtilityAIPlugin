@@ -32,6 +32,16 @@ enum class ENodeType : uint8
 	NodeType_Decision			UMETA(DisplayName = "Decision Node")
 };
 
+/**
+ * Defines the action score evaluation methods.
+ */
+UENUM(BlueprintType)
+enum class EEvaluationMethod : uint8
+{
+	EvaluationMethod_Highest			UMETA(DisplayName = "Highest"),
+	EvaluationMethod_WeightedRandom		UMETA(DisplayName = "Weighted Random")
+};
+
 UCLASS(Blueprintable)
 class UTILITYAIRUNTIME_API UUtilityAINode : public UObject
 {
@@ -60,6 +70,13 @@ public:
 	/** A custom, in editor (based on tangents) defined response curve. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
 	UCurveFloat* CustomResponseCurve;
+
+	/**
+	 * If true, the custom curve has a normalized range (0-1).
+	 * Changes evaluation in SetConsiderationScore().
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	bool bIsNormalizedCustomCurve;
 
 	/** The mathematical response curve type. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
