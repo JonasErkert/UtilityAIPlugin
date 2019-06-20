@@ -7,27 +7,26 @@
 #include "Curves/CurveFloat.h"
 
 
-TArray<float> AUtilityAIController::SortActionScores(const TArray<float>& ActionScores)
+void AUtilityAIController::SetConsiderationScores()
 {
-	TArray<float> InScores = ActionScores;
-	TArray<float> SortedScores;
-
-	// Use action score instead of InScores to avoid iterating a changing array
-	for (const auto& Score : ActionScores)
+	for (auto ActionChildNode : CurrentActionNode->ChildrenNodes)
 	{
-		int32 MaxScoreIndex	= 0;
-		float MaxScore		= 0.f;
-		UKismetMathLibrary::MaxOfFloatArray(InScores, MaxScoreIndex, MaxScore);
+		if (ActionChildNode->NodeType == ENodeType::NodeType_Consideration)
+		{
+			// Set current consideration node.
+			// Important to be set before the consideration scores are implemented and SetConsiderationScore() is called
+			CurrentConsiderationNode = ActionChildNode;
 
-		SortedScores.Add(MaxScore);
-		InScores.RemoveAt(MaxScoreIndex);
+			// How the consideration scores are implemented is implemented in Blueprint
+			ImplementConsiderationScores(ActionChildNode->GetNodeName());
+		}
 	}
-
-	return SortedScores;
 }
 
-float AUtilityAIController::SetConsiderationScore(UUtilityAINode* CurrentConsiderationNode, float ValueToEvaluate)
+float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 {
+	checkf(CurrentConsiderationNode, TEXT("Current consideration node is null!"));
+
 	float MinBookend = CurrentConsiderationNode->BookendMin;
 	float MaxBookend = CurrentConsiderationNode->BookendMax;
 
@@ -69,7 +68,18 @@ float AUtilityAIController::SetConsiderationScore(UUtilityAINode* CurrentConside
 	return ConsiderationScore;
 }
 
-void AUtilityAIController::SetActionScore(UUtilityAINode* CurrentActionNode)
+void AUtilityAIController::SetActionScores(TArray<UUtilityAINode*> ActionNodes)
+{
+	for (auto ActionNode : ActionNodes)
+	{
+		CurrentActionNode = ActionNode;
+
+		SetConsiderationScores();
+		SetActionScore();
+	}
+}
+
+void AUtilityAIController::SetActionScore()
 {
 	// Ensure the action node has a score of 0 (and no previously evaluated score)
 	CurrentActionNode->ActionScore		= 0.f;
@@ -85,4 +95,116 @@ void AUtilityAIController::SetActionScore(UUtilityAINode* CurrentActionNode)
 
 	// Clear the ConsiderationScores array for the next action score node calculation
 	ConsiderationScores.Empty();
+}
+
+void AUtilityAIController::SortActionScores(TArray<UUtilityAINode*> ActionNodes)
+{
+	// Clear array if it contains any elements
+	if (ActionScores.Num() > 0)
+	{
+		ActionScores.Empty();
+	}
+
+	for (auto ActionNode : ActionNodes)
+	{
+		ActionScores.Add(ActionNode->ActionScore);
+	}
+
+	TArray<float> InScores = ActionScores;
+	TArray<float> SortedScores;
+
+	// Use action score instead of InScores to avoid iterating a changing array
+	for (const auto& Score : ActionNodes)
+	{
+		int32 MaxScoreIndex	= 0;
+		float MaxScore		= 0.f;
+		UKismetMathLibrary::MaxOfFloatArray(InScores, MaxScoreIndex, MaxScore);
+
+		SortedScores.Add(MaxScore);
+		InScores.RemoveAt(MaxScoreIndex);
+	}
+
+	ActionScores = SortedScores;
+}
+
+UUtilityAINode* AUtilityAIController::SelectActionNode(
+	TArray<UUtilityAINode*> ActionNodes,
+	EScoreSelectionMethod SelectionMethod /*= EScoreSelectionMethod::ScoreSelectionMethod_Highest*/,
+	int32 TopN /*= 3*/)
+{
+	UUtilityAINode* SelectedAction = nullptr;
+	float ScoreToFind = 0.f;
+
+	switch (SelectionMethod)
+	{
+	case EScoreSelectionMethod::ScoreSelectionMethod_Highest:
+		{
+			// Just pick the highest score
+			ScoreToFind = ActionScores[0];
+		}
+		break;
+
+	case EScoreSelectionMethod::ScoreSelectionMethod_WeightedRandom:
+		{
+			// Add scores of all actions
+			float Total = 0.f;
+			for (auto ActionNode : ActionNodes)
+			{
+				Total += ActionNode->ActionScore;
+			}
+
+			float Choice = (FMath::Rand() * (1.f / RAND_MAX)) * Total;
+			float Accumulation			= 0.f;
+
+			for (auto ActionScore : ActionScores)
+			{
+				Accumulation += ActionScore / Total;
+
+				if (Choice < Accumulation)
+				{
+					ScoreToFind = ActionScore;
+					break;
+				}
+			}
+		}
+		break;
+
+		case EScoreSelectionMethod::ScoreSelectionMethod_RandomTopN:
+		{
+			// Get a random action in the defined range
+			int32 RandomIndex = FMath::RandRange(0, TopN);
+			ScoreToFind = ActionScores[RandomIndex];
+		}
+		break;
+	}
+
+	// Find the action with the corresponding score
+	for (auto ActionNode : ActionNodes)
+	{
+		if (FMath::IsNearlyEqual(ActionNode->ActionScore, ScoreToFind))
+		{
+			SelectedAction = ActionNode;
+			break;
+		}
+	}
+
+	return SelectedAction;
+}
+
+UUtilityAINode* AUtilityAIController::GetDecisionFromAction(UUtilityAINode* WinningActionNode) const
+{
+	UUtilityAINode* DecisionNode = nullptr;
+
+	// Search the action nodes' children for the decision node
+	for (auto ChildrenNode : WinningActionNode->ChildrenNodes)
+	{
+		if (ChildrenNode->NodeType == ENodeType::NodeType_Decision)
+		{
+			DecisionNode = ChildrenNode;
+			break;
+		}
+	}
+
+	checkf(DecisionNode, TEXT("Current action node has no decision node!"));
+	return DecisionNode;
 }
