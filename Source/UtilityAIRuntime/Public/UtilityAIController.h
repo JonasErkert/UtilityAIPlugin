@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "UtilityAIController.generated.h"
 
+class UUtilityAIGraph;
 class UUtilityAINode;
 
 /**
@@ -28,6 +29,16 @@ class UTILITYAIRUNTIME_API AUtilityAIController : public AAIController
 	GENERATED_BODY()
 	
 public:
+	AUtilityAIController();
+
+	/**
+	 * Initialize the Utility AI.
+	 * 
+	 * @param UtilityAI The utility ai graph which defines this ai.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
+	void InitializeUtilityAI(UUtilityAIGraph* UtilityAI);
+
 	/**
 	 * Sets the consideration scores for the current action node.
 	 * @see SetConsidearionScore().
@@ -37,10 +48,9 @@ public:
 
 	/**
 	 * Define here how the consideration score evaluation is implemented.
-	 * Is called in SetConsiderationScores().
 	 * 
-	 * @param ConsiderationName The name of the current consideration node.
-	 * @see SetConsiderationScores().
+	 * @param	ConsiderationName The name of the current consideration node.
+	 * @see		SetConsiderationScores().
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UtilityAI")
 	void ImplementConsiderationScores(FName ConsiderationName);
@@ -51,8 +61,8 @@ public:
 	 * Also writes the calculated score into the ConsiderationScores array, which is used by SetActionScore()
 	 * Uses the current consideration node to retrieve bookends, the custom response curve and to save calculated score within.
 	 * 
-	 * @param ValueToEvaluate The value to normalize and evaluate.
-	 * @see SetActionScore()
+	 * @param	ValueToEvaluate The value to normalize and evaluate.
+	 * @see		SetActionScore()
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
 	float SetConsiderationScore(float ValueToEvaluate);
@@ -60,12 +70,11 @@ public:
 	/**
 	 * Sets the consideration scores for all actions, then calculates all action scores.
 	 * 
-	 * @param ActionNodes Action nodes to calculate the scores for.
 	 * @see SetConsiderationScores().
 	 * @see SetActionScore().
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
-	void SetActionScores(TArray<UUtilityAINode*> ActionNodes);
+	void SetActionScores();
 
 	/**
 	 * Iterates over the ConsiderationScores, multiplies each score and saves the calculated action score into the current action node.
@@ -74,27 +83,22 @@ public:
 	void SetActionScore();
 
 	/**
-	 * Sorts given action scores from highest to lowest score.
+	 * Sorts action scores from highest to lowest score.
 	 *
-	 * @param	ActionScores Scores to sort.
-	 * @return	Sorted action scores, descending order.
+	 * @return Sorted action scores, descending order.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
-	void SortActionScores(TArray<UUtilityAINode*> ActionNodes);
+	void SortActionScores();
 
 	/**
 	 * Selects the next action node based on the selection method.
 	 *
-	 * @param	ActionNodes		The array of action nodes to select the next action.
 	 * @param	SelectionMethod	The method on how to select the action.
 	 * @param	TopN			Top n actions to select randomly from. Only matters when "Random Top n" is the SelectionMethod.
 	 * @return	The selected action node.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
-	UUtilityAINode* SelectActionNode(
-		TArray<UUtilityAINode*> ActionNodes,
-		EScoreSelectionMethod SelectionMethod = EScoreSelectionMethod::ScoreSelectionMethod_Highest,
-		int32 TopN = 3);
+	UUtilityAINode* SelectActionNode(EScoreSelectionMethod SelectionMethod = EScoreSelectionMethod::ScoreSelectionMethod_Highest, int32 TopN = 3);
 
 	/**
 	 * Returns the decision node of the given action node.
@@ -104,6 +108,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
 	UUtilityAINode* GetDecisionFromAction(UUtilityAINode* WinningActionNode) const;
 
+	/**
+	 * Define here how the decisions are implemented.
+	 *
+	 * @param	DecisionName The name of the selected decision node.
+	 * @see		RunUtilityAI().
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UtilityAI")
+	void ImplementDecisions(FName DecisionName);
+
+	/**
+	 * Evaluates the utility ai graph.
+	 * Sets consideration and action scores, selects an action based on the selection method and then chooses the appropriate decision node.
+	 * Needs ImplementConsiderationScores() and ImplementDecision() implementations to work.
+	 *
+	 * @param	SelectionMethod	The method on how to select the action.
+	 * @param	TopN			Top n actions to select randomly from. Only matters when "Random Top n" is the SelectionMethod.
+	 * @see		ImplementConsiderationScores().
+	 * @see		ImplementDecision().
+	 */
+	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
+	void RunUtilityAI(EScoreSelectionMethod SelectionMethod = EScoreSelectionMethod::ScoreSelectionMethod_Highest, int32 TopN = 3);
+
+	/** Returns the action nodes of the assigned utility ai graph. */
+	UFUNCTION(BlueprintPure, Category = "UtilityAI")
+	FORCEINLINE TArray<UUtilityAINode*> GetActionNodes() { return ActionNodes; }
+
 	/** Returns the currently evaluated consideration node. */
 	UFUNCTION(BlueprintPure, Category = "UtilityAI")
 	FORCEINLINE UUtilityAINode* GetCurrentConsiderationNode() { return CurrentConsiderationNode; }
@@ -112,7 +142,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "UtilityAI")
 	FORCEINLINE UUtilityAINode* GetCurrentActionNode() { return CurrentActionNode; }
 
+	/** Returns the consideration score of the currently evaluated consideration. */
+	UFUNCTION(BlueprintPure, Category = "UtilityAI")
+	FORCEINLINE float GetConsiderationScore() { return CurrentConsiderationScore; }
+
 private:
+	/**
+	 * Array of action nodes the assigned graph has.
+	 * Filled in InitilizeUtilityAI() and used in RunUtilityAI().
+	 */
+	UPROPERTY()
+	TArray<UUtilityAINode*> ActionNodes;
+
 	/**
 	 * Array of consideration scores the currently evaluated action node has.
 	 * Filled when executing SetConsiderationScore().
@@ -120,6 +161,12 @@ private:
 	 */
 	UPROPERTY()
 	TArray<float> ConsiderationScores;
+
+	/**
+	 * Consideration score of the currently evaluated consideration.
+	 * Useful/ intended for debugging.
+	 */
+	float CurrentConsiderationScore;
 
 	/**
 	 * Current consideration node.

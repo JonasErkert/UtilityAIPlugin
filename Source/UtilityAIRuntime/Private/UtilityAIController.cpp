@@ -2,10 +2,29 @@
 
 
 #include "UtilityAIController.h"
+#include "UtilityAIGraph.h"
 #include "UtilityAINode.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Curves/CurveFloat.h"
 
+
+AUtilityAIController::AUtilityAIController()
+{
+	CurrentConsiderationScore = 0.f;
+}
+
+void AUtilityAIController::InitializeUtilityAI(UUtilityAIGraph* UtilityAI)
+{
+	UUtilityAINode* RootNode = UtilityAI->RootNodes[0];
+
+	if (RootNode->NodeType == ENodeType::NodeType_Root)
+	{
+		for (auto ActionNode : RootNode->ChildrenNodes)
+		{
+			ActionNodes.Add(ActionNode);
+		}
+	}
+}
 
 void AUtilityAIController::SetConsiderationScores()
 {
@@ -31,7 +50,7 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 	float MaxBookend = CurrentConsiderationNode->BookendMax;
 
 	UCurveFloat* ResponseCurve = CurrentConsiderationNode->CustomResponseCurve;
-	float ConsiderationScore = 0.f;
+	float CalculatedConsiderationScore = 0.f;
 
 	// Make sure the custom response curve is set
 	if (ensureMsgf(ResponseCurve, TEXT("Unexpected null custom response curve! The current consideration node has no custom curve assigned!")))
@@ -43,32 +62,34 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 			float NormalizedValue = UKismetMathLibrary::MapRangeClamped(ValueToEvaluate, MinBookend, MaxBookend, 0.f, 1.f);
 
 			// The remapped value is the fed into the response curve
-			ConsiderationScore = ResponseCurve->GetFloatValue(NormalizedValue);
+			CalculatedConsiderationScore = ResponseCurve->GetFloatValue(NormalizedValue);
 		}
 		else
 		{
 			// If the custom curve isn't normalized, the ValueToEvaluate is probably also not in range 0-1, but matching the custom curves bookends
 			// Therefore the value from the curve doesn't need to be normalized/ remapped anymore
-			ConsiderationScore = ResponseCurve->GetFloatValue(ValueToEvaluate);
+			CalculatedConsiderationScore = ResponseCurve->GetFloatValue(ValueToEvaluate);
 		}
 	}
 
 	// Invert score if ticked in node
 	if (CurrentConsiderationNode->bInvertScore)
 	{
-		ConsiderationScore = 1 - ConsiderationScore;
+		CalculatedConsiderationScore = 1 - CalculatedConsiderationScore;
 	}
 
 	// Store the consideration score in the node itself
-	CurrentConsiderationNode->ConsiderationScore = ConsiderationScore;
+	CurrentConsiderationNode->ConsiderationScore = CalculatedConsiderationScore;
 
 	// Add the score to the ConsiderationScores array, which is later used to set the action score
-	ConsiderationScores.Add(ConsiderationScore);
+	ConsiderationScores.Add(CalculatedConsiderationScore);
 
-	return ConsiderationScore;
+	CurrentConsiderationScore = CalculatedConsiderationScore;
+
+	return CalculatedConsiderationScore;
 }
 
-void AUtilityAIController::SetActionScores(TArray<UUtilityAINode*> ActionNodes)
+void AUtilityAIController::SetActionScores()
 {
 	for (auto ActionNode : ActionNodes)
 	{
@@ -97,7 +118,7 @@ void AUtilityAIController::SetActionScore()
 	ConsiderationScores.Empty();
 }
 
-void AUtilityAIController::SortActionScores(TArray<UUtilityAINode*> ActionNodes)
+void AUtilityAIController::SortActionScores()
 {
 	// Clear array if it contains any elements
 	if (ActionScores.Num() > 0)
@@ -127,10 +148,7 @@ void AUtilityAIController::SortActionScores(TArray<UUtilityAINode*> ActionNodes)
 	ActionScores = SortedScores;
 }
 
-UUtilityAINode* AUtilityAIController::SelectActionNode(
-	TArray<UUtilityAINode*> ActionNodes,
-	EScoreSelectionMethod SelectionMethod /*= EScoreSelectionMethod::ScoreSelectionMethod_Highest*/,
-	int32 TopN /*= 3*/)
+UUtilityAINode* AUtilityAIController::SelectActionNode(EScoreSelectionMethod SelectionMethod /*= EScoreSelectionMethod::ScoreSelectionMethod_Highest*/, int32 TopN /*= 3*/)
 {
 	UUtilityAINode* SelectedAction = nullptr;
 	float ScoreToFind = 0.f;
@@ -207,4 +225,19 @@ UUtilityAINode* AUtilityAIController::GetDecisionFromAction(UUtilityAINode* Winn
 
 	checkf(DecisionNode, TEXT("Current action node has no decision node!"));
 	return DecisionNode;
+}
+
+void AUtilityAIController::RunUtilityAI(EScoreSelectionMethod SelectionMethod /*= EScoreSelectionMethod::ScoreSelectionMethod_Highest*/, int32 TopN /*= 3*/)
+{
+	if (ActionNodes.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Missing InitializeUtilityAI function on begin play! Aborting."));
+		return;
+	}
+
+	SetActionScores();
+	SortActionScores();
+	UUtilityAINode* SelectedDecision = GetDecisionFromAction(SelectActionNode(SelectionMethod, TopN));
+
+	ImplementDecisions(SelectedDecision->GetNodeName());
 }
