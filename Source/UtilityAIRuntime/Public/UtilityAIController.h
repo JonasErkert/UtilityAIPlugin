@@ -118,17 +118,34 @@ public:
 	void ImplementDecisions(FName DecisionName);
 
 	/**
+	 * Check if the decision has changed since the last evaluation.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
+	bool HasDecisionChanged(UUtilityAINode* CurrentDecision);
+
+	/**
+	 * Is called when a decision has changed.
+	 * 
+	 * @param NewDecision The newly selected decision.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UtilityAI")
+	void DecisionChanged(UUtilityAINode* NewDecision);
+
+	/**
 	 * Evaluates the utility ai graph.
 	 * Sets consideration and action scores, selects an action based on the selection method and then chooses the appropriate decision node.
 	 * Needs ImplementConsiderationScores() and ImplementDecision() implementations to work.
+	 * If the decision has changed since the last evaluation, ImplementDecision() is called.
 	 *
 	 * @param	SelectionMethod	The method on how to select the action.
 	 * @param	TopN			Top n actions to select randomly from. Only matters when "Random Top n" is the SelectionMethod.
+	 * @return	The selected action.
 	 * @see		ImplementConsiderationScores().
 	 * @see		ImplementDecision().
+	 * @see		HasDecisionChanged().
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UtilityAI")
-	void RunUtilityAI(EScoreSelectionMethod SelectionMethod = EScoreSelectionMethod::ScoreSelectionMethod_Highest, int32 TopN = 3);
+	UUtilityAINode* RunUtilityAI(EScoreSelectionMethod SelectionMethod = EScoreSelectionMethod::ScoreSelectionMethod_Highest, int32 TopN = 3);
 
 	/** Returns the action nodes of the assigned utility ai graph. */
 	UFUNCTION(BlueprintPure, Category = "UtilityAI")
@@ -188,4 +205,10 @@ private:
 	 */
 	UPROPERTY()
 	TArray<float> ActionScores;
+
+	/**
+	 * The last chosen decision.
+	 */
+	UPROPERTY()
+	UUtilityAINode* LastDecision;
 };

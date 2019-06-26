@@ -7,10 +7,12 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Curves/CurveFloat.h"
 
+#define MAX_CONSIDERATION_SCORE 9999.f
 
 AUtilityAIController::AUtilityAIController()
 {
 	CurrentConsiderationScore = 0.f;
+	LastDecision = nullptr;
 }
 
 void AUtilityAIController::InitializeUtilityAI(UUtilityAIGraph* UtilityAI)
@@ -62,13 +64,15 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 			float NormalizedValue = UKismetMathLibrary::MapRangeClamped(ValueToEvaluate, MinBookend, MaxBookend, 0.f, 1.f);
 
 			// The remapped value is the fed into the response curve
-			CalculatedConsiderationScore = ResponseCurve->GetFloatValue(NormalizedValue);
+			// Clamping because some curves might accidentally return values < 0 or > 1
+			CalculatedConsiderationScore = FMath::Clamp(ResponseCurve->GetFloatValue(NormalizedValue), 0.f, 1.f);
 		}
 		else
 		{
 			// If the custom curve isn't normalized, the ValueToEvaluate is probably also not in range 0-1, but matching the custom curves bookends
 			// Therefore the value from the curve doesn't need to be normalized/ remapped anymore
-			CalculatedConsiderationScore = ResponseCurve->GetFloatValue(ValueToEvaluate);
+			// Clamping because some curves might accidentally return values < 0 or > 1
+			CalculatedConsiderationScore = FMath::Clamp(ResponseCurve->GetFloatValue(ValueToEvaluate), 0.f, 1.f);
 		}
 	}
 
@@ -103,16 +107,27 @@ void AUtilityAIController::SetActionScores()
 void AUtilityAIController::SetActionScore()
 {
 	// Ensure the action node has a score of 0 (and no previously evaluated score)
-	CurrentActionNode->ActionScore		= 0.f;
-	float AccumulatedConsiderationScore	= 1.f; // Initialized with 1 to make the first consideration score multiplication not altering the value
+	CurrentActionNode->ActionScore			= 0.f;
+	float AccumulatedConsiderationScores	= 1.f; // Initialized with 1 to make the first consideration score multiplication not altering the value
 
 	for (float ConsiderationScore : ConsiderationScores)
 	{
-		AccumulatedConsiderationScore *= ConsiderationScore;
+		AccumulatedConsiderationScores *= ConsiderationScore;
+	}
+
+	// Multiply the weight
+	if (CurrentActionNode->bUseWeight)
+	{
+		AccumulatedConsiderationScores *= CurrentActionNode->Weight;
+	}
+
+	if (CurrentActionNode->bDisableAction)
+	{
+		AccumulatedConsiderationScores = 0.f;
 	}
 
 	// Store the action score in the node itself
-	CurrentActionNode->ActionScore = AccumulatedConsiderationScore;
+	CurrentActionNode->ActionScore = AccumulatedConsiderationScores;
 
 	// Clear the ConsiderationScores array for the next action score node calculation
 	ConsiderationScores.Empty();
@@ -227,17 +242,32 @@ UUtilityAINode* AUtilityAIController::GetDecisionFromAction(UUtilityAINode* Winn
 	return DecisionNode;
 }
 
-void AUtilityAIController::RunUtilityAI(EScoreSelectionMethod SelectionMethod /*= EScoreSelectionMethod::ScoreSelectionMethod_Highest*/, int32 TopN /*= 3*/)
+bool AUtilityAIController::HasDecisionChanged(UUtilityAINode* CurrentDecision)
+{
+	return LastDecision != CurrentDecision;
+}
+
+UUtilityAINode* AUtilityAIController::RunUtilityAI(EScoreSelectionMethod SelectionMethod /*= EScoreSelectionMethod::ScoreSelectionMethod_Highest*/, int32 TopN /*= 3*/)
 {
 	if (ActionNodes.Num() == 0)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Missing InitializeUtilityAI function on begin play! Aborting."));
-		return;
+		return nullptr;
 	}
 
 	SetActionScores();
 	SortActionScores();
-	UUtilityAINode* SelectedDecision = GetDecisionFromAction(SelectActionNode(SelectionMethod, TopN));
+
+	UUtilityAINode* SelectedAction		= SelectActionNode(SelectionMethod, TopN);
+	UUtilityAINode* SelectedDecision	= GetDecisionFromAction(SelectedAction);
+	if (HasDecisionChanged(SelectedDecision))
+	{
+		DecisionChanged(SelectedDecision);
+	}
 
 	ImplementDecisions(SelectedDecision->GetNodeName());
+
+	LastDecision = SelectedDecision;
+
+	return SelectedAction;
 }

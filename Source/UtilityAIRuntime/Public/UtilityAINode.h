@@ -127,6 +127,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
 	bool bInvertScore;
 
+	/**
+	 * Disabling the action node will set the action score to 0, so it will never get selected.
+	 * Useful for debugging.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	bool bDisableAction;
+
 	UFUNCTION(BlueprintCallable, Category = "UtilityAINode")
 	virtual UUtilityAIEdge* GetEdge(UUtilityAINode* ChildNode);
 
