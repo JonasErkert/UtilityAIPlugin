@@ -14,6 +14,10 @@ UUtilityAINode::UUtilityAINode()
 	bUseWeight			= false;
 	Weight				= 1.f;
 	bInvertScore		= false;
+	bRandomShift		= false;
+	RandomShiftRange	= 0.5f;
+	RandomShift			= 0.f;
+	bIsShiftSet			= false;
 
 #if WITH_EDITORONLY_DATA
 	CompatibleGraphType = UUtilityAIGraph::StaticClass();

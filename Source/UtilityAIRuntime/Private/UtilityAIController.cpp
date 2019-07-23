@@ -57,6 +57,31 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 	// Make sure the custom response curve is set
 	if (ensureMsgf(ResponseCurve, TEXT("Unexpected null custom response curve! The current consideration node has no custom curve assigned!")))
 	{
+		// Check if the curve has random y-Axis shift enabled
+		if (CurrentConsiderationNode->bRandomShift)
+		{
+			// Set the random shift only once to avoid a new random every evaluation
+			if (!CurrentConsiderationNode->bIsShiftSet)
+			{
+				CurrentConsiderationNode->bIsShiftSet = true;
+				CurrentConsiderationNode->RandomShift = FMath::FRandRange(0.f, CurrentConsiderationNode->RandomShiftRange);
+			}
+
+			// Add the random shift to the y-Axis value (ValueToEvaluate)
+			// If the the random shift overflows the curve MaxBookend, add the overflowing to the MinBookend
+			if (ValueToEvaluate + CurrentConsiderationNode->RandomShift > MaxBookend)
+			{
+				// Calculate the overflow shift
+				float Leftover	= CurrentConsiderationNode->RandomShift - (MaxBookend - ValueToEvaluate);
+				ValueToEvaluate	= MinBookend + Leftover;
+
+			}
+			else
+			{
+				ValueToEvaluate += CurrentConsiderationNode->RandomShift;
+			}
+		}
+
 		// If the response curve is normalized...
 		if (CurrentConsiderationNode->bIsNormalizedCustomCurve)
 		{

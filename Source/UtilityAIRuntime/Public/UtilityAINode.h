@@ -128,6 +128,24 @@ public:
 	bool bInvertScore;
 
 	/**
+	 * If true, the associated curve has a random shift on the y-Axis.
+	 * Shift depends on the y-Axis range.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	bool bRandomShift;
+
+	/** Define the range of the random shift. Dependent on the y-Axis range of the curve. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	float RandomShiftRange;
+
+	/** Saves the calculated random shift. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UtilityAINode")
+	float RandomShift;
+
+	/** Determine of the random shift of this node is already set. */
+	bool bIsShiftSet;
+
+	/**
 	 * Disabling the action node will set the action score to 0, so it will never get selected.
 	 * Useful for debugging.
 	 */
