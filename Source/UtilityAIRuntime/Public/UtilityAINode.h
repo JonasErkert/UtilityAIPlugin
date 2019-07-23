@@ -61,23 +61,30 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
 	ENodeType NodeType;
 
+	/**
+	 * Disabling the action node will set the action score to 0, so it will never get selected.
+	 * Useful for debugging.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Action Node")
+	bool bDisableAction;
+
 	/** A custom, in editor (based on tangents) defined response curve. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
 	UCurveFloat* CustomResponseCurve;
 
 	/**
 	 * If true, the custom curve has a normalized range (0-1).
 	 * Changes evaluation in SetConsiderationScore().
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
 	bool bIsNormalizedCustomCurve;
 
 	/** The mathematical response curve type. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
 	EResponseCurveType ResponseCurveType;
 
 	/** Used to determine if node uses the editor curve or the mathematical curve representation. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
 	bool bUsingCustomResponseCurve;
 
 	/**
@@ -87,70 +94,63 @@ public:
 	 * b = vertical shift
 	 * c = horizontal shift
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
 	TArray<int32> ResponseCurveParameters;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode|Debug")
 	float ActionScore;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode|Debug")
 	float ConsiderationScore;
 
 	/**
 	 * The minimum value a certain parameter can have.
 	 * All values below will get clamped to the defined value.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Consideration Node")
 	float BookendMin;
 
 	/**
 	 * The maximum value a certain parameter can have.
 	 * All values above will get clamped to the defined value.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Consideration Node")
 	float BookendMax;
 
 	/**
 	 * Defines if this node uses additional weight.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Action Node")
 	bool bUseWeight;
 	
 	/**
 	 * Additional weighting the score is multiplied with.
 	 * Used to implicitly prioritize scores.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode", meta = (ClampMin = "0.0", ClampMax = "100.0"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Action Node", meta = (ClampMin = "0.0", ClampMax = "100.0"))
 	float Weight;
 
 	/** If true, the the evaluated score gets inverted (1 - x). */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Consideration Node")
 	bool bInvertScore;
 
 	/**
 	 * If true, the associated curve has a random shift on the y-Axis.
 	 * Shift depends on the y-Axis range.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Consideration Node")
 	bool bRandomShift;
 
 	/** Define the range of the random shift. Dependent on the y-Axis range of the curve. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode|Consideration Node")
 	float RandomShiftRange;
 
 	/** Saves the calculated random shift. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UtilityAINode")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UtilityAINode|Debug")
 	float RandomShift;
 
 	/** Determine of the random shift of this node is already set. */
 	bool bIsShiftSet;
-
-	/**
-	 * Disabling the action node will set the action score to 0, so it will never get selected.
-	 * Useful for debugging.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UtilityAINode")
-	bool bDisableAction;
 
 	UFUNCTION(BlueprintCallable, Category = "UtilityAINode")
 	virtual UUtilityAIEdge* GetEdge(UUtilityAINode* ChildNode);
