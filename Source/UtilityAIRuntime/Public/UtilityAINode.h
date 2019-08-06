@@ -10,17 +10,6 @@ class UUtilityAIGraph;
 class UUtilityAIEdge;
 
 /**
- * Defines the different response curve types.
- */
-UENUM(BlueprintType)
-enum class EResponseCurveType : uint8
-{
-	ResponseCurveType_Linear		UMETA(DisplayName = "Linear Response Curve"),
-	ResponseCurveType_Quadratic		UMETA(DisplayName = "Quadratic Response Curve"),
-	ResponseCurveType_Logistic		UMETA(DisplayName = "Logistic Response Curve")
-};
-
-/**
  * Defines the node type.
  */
 UENUM(BlueprintType)
@@ -57,6 +46,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
 	FName NodeName;
 
+	/** Describes what the node does and important notes. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
+	FString NodeDescription;
+
 	/** The node this this node represents. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode")
 	ENodeType NodeType;
@@ -78,24 +71,6 @@ public:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
 	bool bIsNormalizedCustomCurve;
-
-	/** The mathematical response curve type. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
-	EResponseCurveType ResponseCurveType;
-
-	/** Used to determine if node uses the editor curve or the mathematical curve representation. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
-	bool bUsingCustomResponseCurve;
-
-	/**
-	 * The mathematical response curve type parameters IN ORDER:
-	 * m = slope
-	 * k = vertical size
-	 * b = vertical shift
-	 * c = horizontal shift
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
-	TArray<int32> ResponseCurveParameters;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode|Debug")
 	float ActionScore;

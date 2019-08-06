@@ -5,8 +5,8 @@
 
 UUtilityAINode::UUtilityAINode()
 {
-	bUsingCustomResponseCurve	= true;
-	bIsNormalizedCustomCurve	= true;
+	bIsNormalizedCustomCurve = true;
+	NodeDescription		= TEXT("Description.");
 	ActionScore			= 0.f;
 	ConsiderationScore	= 0.f;
 	BookendMin			= 0.f;
