@@ -63,14 +63,14 @@ public:
 
 	/** A custom, in editor (based on tangents) defined response curve. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
-	UCurveFloat* CustomResponseCurve;
+	UCurveFloat* ResponseCurve;
 
 	/**
 	 * If true, the custom curve has a normalized range (0-1).
 	 * Changes evaluation in SetConsiderationScore().
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
-	bool bIsNormalizedCustomCurve;
+	bool bIsCustomCurve;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode|Debug")
 	float ActionScore;

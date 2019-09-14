@@ -51,7 +51,7 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 	float MinBookend = CurrentConsiderationNode->BookendMin;
 	float MaxBookend = CurrentConsiderationNode->BookendMax;
 
-	UCurveFloat* ResponseCurve = CurrentConsiderationNode->CustomResponseCurve;
+	UCurveFloat* ResponseCurve = CurrentConsiderationNode->ResponseCurve;
 	float CalculatedConsiderationScore = 0.f;
 
 	// Make sure the custom response curve is set
@@ -83,7 +83,7 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 		}
 
 		// If the response curve is normalized...
-		if (CurrentConsiderationNode->bIsNormalizedCustomCurve)
+		if (CurrentConsiderationNode->bIsCustomCurve)
 		{
 			// ... the ValueToEvaluate can be normalized/ remapped
 			float NormalizedValue = UKismetMathLibrary::MapRangeClamped(ValueToEvaluate, MinBookend, MaxBookend, 0.f, 1.f);
