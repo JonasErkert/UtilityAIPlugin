@@ -70,7 +70,7 @@ public:
 	 * Changes evaluation in SetConsiderationScore().
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UtilityAINode|Consideration Node")
-	bool bIsCustomCurve;
+	bool bIsNormalizedCurve;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UtilityAINode|Debug")
 	float ActionScore;

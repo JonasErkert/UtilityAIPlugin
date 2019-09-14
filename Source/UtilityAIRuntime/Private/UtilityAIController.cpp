@@ -83,7 +83,7 @@ float AUtilityAIController::SetConsiderationScore(float ValueToEvaluate)
 		}
 
 		// If the response curve is normalized...
-		if (CurrentConsiderationNode->bIsCustomCurve)
+		if (CurrentConsiderationNode->bIsNormalizedCurve)
 		{
 			// ... the ValueToEvaluate can be normalized/ remapped
 			float NormalizedValue = UKismetMathLibrary::MapRangeClamped(ValueToEvaluate, MinBookend, MaxBookend, 0.f, 1.f);

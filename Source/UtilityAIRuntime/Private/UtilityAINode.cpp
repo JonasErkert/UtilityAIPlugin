@@ -5,7 +5,7 @@
 
 UUtilityAINode::UUtilityAINode()
 {
-	bIsCustomCurve = true;
+	bIsNormalizedCurve = true;
 	NodeDescription		= TEXT("Description.");
 	ActionScore			= 0.f;
 	ConsiderationScore	= 0.f;
